@@ -1,0 +1,165 @@
+﻿@page "/{participantId}/exam"
+@inject Common Common
+@inject Code Code
+@inject NavigationManager NavigationManager
+@inject IJSRuntime JSRuntime
+@inject Blazored.LocalStorage.ILocalStorageService LocalStorage
+@using Microsoft.CodeAnalysis.CSharp.Scripting
+@using Microsoft.CodeAnalysis.Scripting
+
+<div id="side">
+    <div id="control">
+        <span>@timeLeft</span>
+        <button id="run" @onclick="Run">Save and Run</button>
+        <button id="submit" @onclick=Submit>Submit</button>
+    </div>
+    @((MarkupString)result)
+</div>
+
+<div id="container">
+    <pre>@Code.RandomPreCode</pre>
+    <InputTextArea class="code" cols="75" rows="16" @bind-Value="RandomCode"></InputTextArea>
+    <pre language="csharp">}</pre>
+
+    <pre language="csharp">@Code.SortPreCode</pre>
+    <InputTextArea class="code" cols="75" rows="20" @bind-Value="SortCode"></InputTextArea>
+    <pre language="csharp">}</pre>
+
+    <pre>@Code.DivisibilityPreCode</pre>
+    <InputTextArea class="code" cols="75" rows="26" @bind-Value="DivisibilityCode"></InputTextArea>
+    <pre>}</pre>
+</div>
+
+@code {
+    private string? RandomCode;
+    protected string? SortCode;
+    protected string? DivisibilityCode;
+
+
+    [Parameter]
+    public string? participantId { get; set; }
+
+    private string? _participant;
+    public string? Participant
+    {
+        get
+        {
+            if (string.IsNullOrWhiteSpace(_participant))
+            {
+                _participant = Common.GetParticipant(participantId);
+            }
+            return _participant;
+        }
+    }
+
+    private async Task<bool> CanSubmit()
+    {
+        DateTime? started = await LocalStorage.GetItemAsync<DateTime?>("Started");
+        DateTime? submitted = await LocalStorage.GetItemAsync<DateTime?>("Submitted");
+        if (string.IsNullOrWhiteSpace(Participant)
+            || started == null
+            || submitted != null)
+        {
+            NavigationManager.NavigateTo("/prohibited");
+            return false;
+        }
+        return true;
+    }
+
+    private async Task Submit()
+    {
+        bool confirmed = await CanSubmit() && await JSRuntime.InvokeAsync<bool>("confirm", "Are you sure you are done with all 3 coding tests?");
+        if (confirmed)
+        {
+            NavigationManager.NavigateTo("/completed");
+            await LocalStorage.SetItemAsync<DateTime>("Submitted", DateTime.Now);
+            string codeResult = await ExecuteCode();
+            var started = await LocalStorage.GetItemAsync<DateTime?>("Started");
+            var timeElapsed = (DateTime.Now - started.Value).ToString("hh\\:mm\\:ss");
+            await Common.SendEmail($"JayG Coding Exam - {Participant} Submitted", $"{Common.ToSingaporeTime(started.Value)} -> {Common.ToSingaporeTime(DateTime.Now)} ({timeElapsed})<pre>{codeResult}</pre>", Code.FormatCode(RandomCode, SortCode, DivisibilityCode));
+        }
+    }
+
+    private string timeLeft = "00:00";
+    private readonly CancellationTokenSource _timerCancellationToken = new();
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            await JSRuntime.InvokeVoidAsync("highlightSnippet");
+
+            string? localRandomCode = await LocalStorage.GetItemAsync<string?>("RandomCode");
+            RandomCode = localRandomCode ?? Code.RandomCode;
+
+            string? localSortCode = await LocalStorage.GetItemAsync<string?>("SortCode");
+            SortCode = localSortCode ?? Code.SortCode;
+
+            string? localDivisibilityCode = await LocalStorage.GetItemAsync<string?>("DivisibilityCode");
+            DivisibilityCode = localDivisibilityCode ?? Code.DivisibilityCode;
+
+            var started = await LocalStorage.GetItemAsync<DateTime?>("Started");
+            if (started == null)
+            {
+                return;
+            }
+
+            var endTime = started.Value.AddMinutes(40);
+            if (DateTime.Now > endTime)
+            {
+                return;
+            }
+
+            using var timer = new PeriodicTimer(TimeSpan.FromSeconds(1));
+            while (!_timerCancellationToken.IsCancellationRequested && await timer.WaitForNextTickAsync())
+            {
+                timeLeft = (endTime - DateTime.Now).ToString("mm\\:ss");
+                await InvokeAsync(StateHasChanged);
+            }
+            return;
+        }
+    }
+    public void Dispose()
+    {
+        _timerCancellationToken.Cancel();
+        _timerCancellationToken.Dispose();
+        GC.SuppressFinalize(this);
+    }
+
+    private string result = string.Empty;
+    private async Task Run()
+    {
+        result = "Running test cases...";
+        await Task.Yield();
+
+        await LocalStorage.SetItemAsync<string>("RandomCode", RandomCode);
+        await LocalStorage.SetItemAsync<string>("SortCode", SortCode);
+        await LocalStorage.SetItemAsync<string>("DivisibilityCode", DivisibilityCode);
+
+        result = await ExecuteCode();
+    }
+
+    private async Task<string> ExecuteCode()
+    {
+        string code = Code.FormatCode(RandomCode, SortCode, DivisibilityCode);
+        var options = ScriptOptions.Default
+                        .AddReferences("mscorlib", "System.Core")
+                        .AddImports("System", "System.Linq", "System.Collections.Generic", "System.Text");
+        try
+        {
+            var program = await CSharpScript.RunAsync(code, options);
+            var method = await program.ContinueWithAsync<string>("Program.Run()");
+            return this.FormatPassedText(method.ReturnValue);
+        }
+        catch (Exception exception)
+        {
+            return exception.Message;
+        }
+    }
+
+    private string FormatPassedText(string returnValue)
+    {
+        returnValue = returnValue.Replace("Passed: True", "Passed: <span style='color: #397300'>True</span>");
+        returnValue = returnValue.Replace("Passed: False", "Passed: <span style='color: #800'>False</span>");
+        return returnValue;
+    }
+}

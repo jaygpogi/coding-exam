@@ -1,0 +1,88 @@
+﻿@page "/{participantId}/start"
+@inject Common Common
+@inject NavigationManager NavigationManager
+@inject IJSRuntime JSRuntime
+@inject Blazored.LocalStorage.ILocalStorageService LocalStorage
+
+<div class="startMessage">
+    <p>Welcome @Participant.</p>
+    <ul>
+        @foreach(string instruction in instructions)
+        {
+            <li>@instruction</li>
+        }
+    </ul>
+</div>
+<p>
+    <InputCheckbox @bind-Value="instructionsCheck"/> I understand all instructions.
+</p>
+<button id="startButton" @onclick="StartExam">Start</button>
+
+@code {
+    [Parameter]
+    public string? participantId { get; set; }
+
+    private string? _participant;
+    public string? Participant 
+    {
+        get
+        {
+            if (string.IsNullOrWhiteSpace(_participant))
+            {
+                _participant = Common.GetParticipant(participantId);
+            }
+            return _participant;
+        }
+    }
+
+    List<string> instructions = new List<string>()
+    {
+        "Do the coding exam in a place with a stable internet connection.",
+        "Do not use browser controls to navigate through the app (eg. back, forward).",
+        "On the next page, you will be given 3 methods that need to satisfy specific requirements.",
+        "Follow the instructions on the code comments.",
+        "Click Save and Run to save your work and confirm the methods are working as desired.",
+        "Click Submit only if you are done with the 3.",
+        "You have 40 minutes to fix all 3 methods.",
+        "Your answers will be invalid if you submitted it after the time expired.",
+        "Timer starts when you click Start below."
+    };
+    bool instructionsCheck = false;
+
+    private async Task StartExam()
+    {
+        if (!instructionsCheck)
+        {
+            await JSRuntime.InvokeVoidAsync("alert", "Tick the checkbox to confirm you understand the instructions.");
+            return;
+        }
+        bool canSubmit = await CanSubmit();
+        if (canSubmit)
+        {
+            NavigationManager.NavigateTo($"/{participantId}/exam");
+            await LocalStorage.SetItemAsync<DateTime>("Started", DateTime.Now);
+            await Common.SendEmail($"JayG Coding Exam - {Participant} Started", Common.ToSingaporeTime(DateTime.Now).ToString());
+        }
+    }
+
+    private async Task<bool> CanSubmit()
+    {
+        DateTime? submitted = await LocalStorage.GetItemAsync<DateTime?>("Submitted");
+        if (string.IsNullOrWhiteSpace(participantId)
+            || string.IsNullOrWhiteSpace(Participant)
+            || submitted != null)
+        {
+            NavigationManager.NavigateTo("/prohibited");
+            return false;
+        }
+
+        DateTime? started = await LocalStorage.GetItemAsync<DateTime?>("Started");
+        if (started != null)
+        {
+            NavigationManager.NavigateTo($"/{participantId}/exam");
+            return false;
+        }
+
+        return true;
+    }
+}

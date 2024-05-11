@@ -1,0 +1,53 @@
+body {
+    padding-left: 10px;
+    font-size:1.1em;
+}
+
+body, #nameTextBox, #startButton, .code, #run, #submit {
+    font-family: monospace;
+    background: #f3f3f3;
+    color: #444;
+}
+
+#startButton, #run, #submit {
+    font-size: 1em;
+    padding: 5px;
+    border: 1px solid
+}
+
+.code {
+    margin-left: 10px;
+    border: 1px solid;
+    padding: 10px;
+    font-size:1em;
+}
+
+#startButton, #run, #submit {
+    cursor: pointer;
+}
+
+#side {
+    position: fixed;
+    left: 690px;
+    padding: 5px;
+    white-space: pre-line;
+    background: #f3f3f3;
+    z-index: 999;
+}
+#control{
+    white-space:normal;
+    margin-bottom:-5px;
+}
+
+.startMessage {
+    margin-bottom: 10px;
+}
+
+pre:first-child {
+    margin-top:0;
+}
+
+#container {
+    position: absolute;
+    top: -5px;
+}
