@@ -13,4 +13,4 @@ EMAIL_RECIPIENT = email address the notifications to be sent to.
 ```
 
 ## Usage
-Generate an ID using the /generateid route. Add it as environment variable and set candidate name as value. Then use route /[ID]/start to start app.
+Generate an ID using the /generate route. Add it as environment variable and set candidate name as value. Then use route /[ID]/start to start app.
