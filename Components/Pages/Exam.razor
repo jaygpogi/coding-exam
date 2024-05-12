@@ -151,6 +151,7 @@
     {
         returnValue = returnValue.Replace("Passed: True", "Passed: <span style='color: #397300'>True</span>");
         returnValue = returnValue.Replace("Passed: False", "Passed: <span style='color: #800'>False</span>");
+        returnValue = returnValue.Replace("Exception: ", "<span style='color: #800'>Exception: </span>");
         return returnValue;
     }
 }
