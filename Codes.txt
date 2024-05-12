@@ -1,0 +1,75 @@
+﻿// Get the longest possible string length between
+// the first less than (<) and last greater than (>) signs
+// Do not use IndexOf(), LastIndexOf(), and Regex
+// If the less than and greater than signs are not properly closed, return 0.
+public static string LongestBetween(string input)
+{
+#EDITABLE#int start = 0;
+int end = 0;
+for(int i = 0; i < input.Length; i++)
+{
+    if(input[i] == '<')
+    {
+        start = i;
+    }
+}
+return start.ToString();#EDITABLE#
+}
+#SPLIT#
+// This sorts the list in ascending order using ranks.
+// Each number will be compared against other numbers.
+// Rank is the count of all numbers less than the current number.
+// Currentnumber will then be saved depending on his rank as index on the array
+// Do not use pre-defined sorting methods (eg.Sort, OrderBy)
+public static string SortNumbers(string input)
+{
+#EDITABLE#List<int> numbers = input.Split(',').Select(x => int.Parse(x)).ToList();
+int[] output = new int[5];
+for(int i = 0; i < numbers.Count + 1; i++)
+{
+   int rank = 0;
+   int currentNumber = numbers[i];
+   for(int j = 0; j < i; j++)
+   {
+      if(currentNumber < numbers[j])
+      {
+         rank++;
+      }
+   }
+   output[i] = currentNumber;
+}
+return string.Join(",", output);#EDITABLE#
+}
+#SPLIT#
+// if divisible by 2, write 'Two'
+// if divisible by 5, write 'Five'
+// if divisible by 10, write 'Ten'
+// if not divisible by 2, 5, and 10, write the number
+// sample result: 1,Two,3,Two,Five,Two,7,Two,9,Ten
+public static string DetermineDivisibilities(string input)
+{
+#EDITABLE#List<int> numbers = input.Split(',').Select(x => int.Parse(x)).ToList();
+var output = new List<string>();
+foreach(var number in numbers)
+{
+   if(number % 2 == 0) // if number is divisible by 2
+   {
+      output.Add("Two");
+      continue;
+   }
+   else
+   {
+      output.Add("Ten");
+      continue;
+   }
+   if (number % 5 == 0) // if number is divisible by 5
+   {
+      output.Add("Five");
+   }
+   else
+   {
+      output.Add(number.ToString());
+   }
+}
+return string.Join(",", output);#EDITABLE#
+}

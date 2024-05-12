@@ -19,7 +19,7 @@ body, #nameTextBox, #startButton, .code, #run, #submit {
     margin-left: 10px;
     border: 1px solid;
     padding: 10px;
-    font-size:1em;
+    font-size: 1em;
 }
 
 #startButton, #run, #submit {
@@ -41,13 +41,4 @@ body, #nameTextBox, #startButton, .code, #run, #submit {
 
 .startMessage {
     margin-bottom: 10px;
-}
-
-pre:first-child {
-    margin-top:0;
-}
-
-#container {
-    position: absolute;
-    top: -5px;
 }

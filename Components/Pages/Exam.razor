@@ -1,6 +1,6 @@
 ﻿@page "/{participantId}/exam"
 @inject Common Common
-@inject Code Code
+@inject CodeHelper CodeHelper
 @inject NavigationManager NavigationManager
 @inject IJSRuntime JSRuntime
 @inject Blazored.LocalStorage.ILocalStorageService LocalStorage
@@ -17,25 +17,15 @@
 </div>
 
 <div id="container">
-    <pre>@Code.RandomPreCode</pre>
-    <InputTextArea class="code" cols="75" rows="16" @bind-Value="RandomCode"></InputTextArea>
-    <pre language="csharp">}</pre>
-
-    <pre language="csharp">@Code.SortPreCode</pre>
-    <InputTextArea class="code" cols="75" rows="20" @bind-Value="SortCode"></InputTextArea>
-    <pre language="csharp">}</pre>
-
-    <pre>@Code.DivisibilityPreCode</pre>
-    <InputTextArea class="code" cols="75" rows="26" @bind-Value="DivisibilityCode"></InputTextArea>
-    <pre>}</pre>
+    @foreach(Code item in CodeHelper.Codes)
+    {
+        <pre>@item.Signature</pre>
+        <InputTextArea class="code" cols="75" rows="30" @bind-Value="item.Editable"></InputTextArea>
+        <pre>}</pre>
+    }
 </div>
 
 @code {
-    private string? RandomCode;
-    protected string? SortCode;
-    protected string? DivisibilityCode;
-
-
     [Parameter]
     public string? participantId { get; set; }
 
@@ -76,7 +66,7 @@
             string codeResult = await ExecuteCode();
             var started = await LocalStorage.GetItemAsync<DateTime?>("Started");
             var timeElapsed = (DateTime.Now - started.Value).ToString("hh\\:mm\\:ss");
-            await Common.SendEmail($"JayG Coding Exam - {Participant} Submitted", $"{Common.ToSingaporeTime(started.Value)} -> {Common.ToSingaporeTime(DateTime.Now)} ({timeElapsed})<pre>{codeResult}</pre>", Code.FormatCode(RandomCode, SortCode, DivisibilityCode));
+            await Common.SendEmail($"JayG Coding Exam - {Participant} Submitted", $"{Common.ToSingaporeTime(started.Value)} -> {Common.ToSingaporeTime(DateTime.Now)} ({timeElapsed})<pre>{codeResult}</pre>", CodeHelper.FullCode());
         }
     }
 
@@ -88,14 +78,14 @@
         {
             await JSRuntime.InvokeVoidAsync("highlightSnippet");
 
-            string? localRandomCode = await LocalStorage.GetItemAsync<string?>("RandomCode");
-            RandomCode = localRandomCode ?? Code.RandomCode;
-
-            string? localSortCode = await LocalStorage.GetItemAsync<string?>("SortCode");
-            SortCode = localSortCode ?? Code.SortCode;
-
-            string? localDivisibilityCode = await LocalStorage.GetItemAsync<string?>("DivisibilityCode");
-            DivisibilityCode = localDivisibilityCode ?? Code.DivisibilityCode;
+            for (int i = 0; i < CodeHelper.Codes.Count; i++)
+            {
+                string? localCode = await LocalStorage.GetItemAsync<string?>($"LocalCode{i}");
+                if (!string.IsNullOrWhiteSpace(localCode))
+                {
+                    CodeHelper.Codes[i].Editable = localCode;
+                }
+            }
 
             var started = await LocalStorage.GetItemAsync<DateTime?>("Started");
             if (started == null)
@@ -131,16 +121,17 @@
         result = "Running test cases...";
         await Task.Yield();
 
-        await LocalStorage.SetItemAsync<string>("RandomCode", RandomCode);
-        await LocalStorage.SetItemAsync<string>("SortCode", SortCode);
-        await LocalStorage.SetItemAsync<string>("DivisibilityCode", DivisibilityCode);
+        for (int i = 0; i < CodeHelper.Codes.Count; i++)
+        {
+            await LocalStorage.SetItemAsync<string>($"LocalCode{i}", CodeHelper.Codes[i].Editable);
+        }
 
         result = await ExecuteCode();
     }
 
     private async Task<string> ExecuteCode()
     {
-        string code = Code.FormatCode(RandomCode, SortCode, DivisibilityCode);
+        string code = CodeHelper.FullCode();
         var options = ScriptOptions.Default
                         .AddReferences("mscorlib", "System.Core")
                         .AddImports("System", "System.Linq", "System.Collections.Generic", "System.Text");

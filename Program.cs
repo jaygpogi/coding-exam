@@ -8,7 +8,7 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
 builder.Services.AddScoped(x => new Common());
-builder.Services.AddScoped(x => new Code());
+builder.Services.AddScoped(x => new CodeHelper());
 builder.Services.AddBlazoredLocalStorage();
 
 var app = builder.Build();

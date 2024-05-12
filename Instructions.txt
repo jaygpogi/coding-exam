@@ -1,0 +1,9 @@
+﻿Do the coding exam in a place with a stable internet connection.
+Do not use browser controls to navigate through the app (eg. back, forward).
+On the next page, you will be given 3 methods that need to satisfy specific requirements.
+Follow the instructions on the code comments.
+Click Save and Run to save your work and confirm the methods are working as desired.
+Click Submit only if you are done with the 3.
+You have 40 minutes to fix all 3 methods.
+Your answers will be invalid if you submitted it after the time expired.
+Timer starts when you click Start below.
