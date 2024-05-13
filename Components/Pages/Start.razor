@@ -38,6 +38,14 @@
     string[] instructions = File.ReadAllLines("Instructions.txt");
     bool instructionsCheck = false;
 
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            await CanSubmit();
+        }
+    }
+
     private async Task StartExam()
     {
         if (!instructionsCheck)

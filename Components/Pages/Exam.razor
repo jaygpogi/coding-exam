@@ -77,6 +77,12 @@
     {
         if (firstRender)
         {
+            var canSubmit = await CanSubmit();
+            if(!canSubmit)
+            {
+                return;
+            }
+
             await JSRuntime.InvokeVoidAsync("highlightSnippet");
 
             for (int i = 0; i < CodeHelper.Codes.Count; i++)
@@ -123,6 +129,12 @@
     {
         result = "Running test cases...";
         await Task.Yield();
+
+        bool canSubmit = await CanSubmit();
+        if (!canSubmit)
+        {
+            return;
+        }
 
         for (int i = 0; i < CodeHelper.Codes.Count; i++)
         {
