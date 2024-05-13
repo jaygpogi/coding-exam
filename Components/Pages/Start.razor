@@ -16,7 +16,7 @@
 <p>
     <InputCheckbox @bind-Value="instructionsCheck"/> I understand all instructions.
 </p>
-<button id="startButton" @onclick="StartExam">Start</button>
+<button id="startButton" disabled="@isStarting" @onclick="StartExam">@startText</button>
 
 @code {
     [Parameter]
@@ -46,6 +46,8 @@
         }
     }
 
+    string startText = "Start";
+    bool isStarting = false;
     private async Task StartExam()
     {
         if (!instructionsCheck)
@@ -53,12 +55,19 @@
             await JSRuntime.InvokeVoidAsync("alert", "Tick the checkbox to confirm you understand the instructions.");
             return;
         }
+        isStarting = true;
+        startText = "Starting...";
+
         bool canSubmit = await CanSubmit();
         if (canSubmit)
         {
+            DateTime? started = await LocalStorage.GetItemAsync<DateTime?>("Started");
+            if (started == null)
+            {
+                await LocalStorage.SetItemAsync<DateTime>("Started", DateTime.Now);
+                await Common.SendEmail($"JayG Coding Exam - {Participant} Started", Common.ToSingaporeTime(DateTime.Now).ToString());
+            }
             NavigationManager.NavigateTo($"/{participantId}/exam");
-            await LocalStorage.SetItemAsync<DateTime>("Started", DateTime.Now);
-            await Common.SendEmail($"JayG Coding Exam - {Participant} Started", Common.ToSingaporeTime(DateTime.Now).ToString());
         }
     }
 
@@ -70,13 +79,6 @@
             || submitted != null)
         {
             NavigationManager.NavigateTo("/prohibited");
-            return false;
-        }
-
-        DateTime? started = await LocalStorage.GetItemAsync<DateTime?>("Started");
-        if (started != null)
-        {
-            NavigationManager.NavigateTo($"/{participantId}/exam");
             return false;
         }
 

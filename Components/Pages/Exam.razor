@@ -10,8 +10,8 @@
 <div id="side">
     <div id="control">
         <span>@timeLeft</span>
-        <button id="run" @onclick="Run">Run Tests</button>
-        <button id="submit" @onclick=Submit>Submit</button>
+        <button id="run" disabled="@isProcessing" @onclick="Run">@runText</button>
+        <button id="submit" disabled="@isProcessing" @onclick=Submit>@submitText</button>
     </div>
     @((MarkupString)result)
 </div>
@@ -47,6 +47,7 @@
     {
         DateTime? started = await LocalStorage.GetItemAsync<DateTime?>("Started");
         DateTime? submitted = await LocalStorage.GetItemAsync<DateTime?>("Submitted");
+
         if (string.IsNullOrWhiteSpace(Participant)
             || started == null
             || submitted != null)
@@ -57,17 +58,23 @@
         return true;
     }
 
+    bool isProcessing = false;
+    string submitText = "Submit";
     private async Task Submit()
     {
         bool confirmed = await CanSubmit() && await JSRuntime.InvokeAsync<bool>("confirm", "Are you sure you are done with all 3 coding tests?");
         if (confirmed)
         {
-            NavigationManager.NavigateTo("/completed");
+            isProcessing = true;
+            submitText = "Submitting...";
+            await InvokeAsync(StateHasChanged);
+
             await LocalStorage.SetItemAsync<DateTime>("Submitted", DateTime.Now);
             string codeResult = await ExecuteCode();
             var started = await LocalStorage.GetItemAsync<DateTime?>("Started");
             var timeElapsed = (DateTime.Now - started.Value).ToString("hh\\:mm\\:ss");
             await Common.SendEmail($"JayG Coding Exam - {Participant} Submitted", $"{Common.ToSingaporeTime(started.Value)} -> {Common.ToSingaporeTime(DateTime.Now)} ({timeElapsed})<pre>{codeResult}</pre>", CodeHelper.FullCode());
+            NavigationManager.NavigateTo("/completed");
         }
     }
 
@@ -78,7 +85,7 @@
         if (firstRender)
         {
             var canSubmit = await CanSubmit();
-            if(!canSubmit)
+            if (!canSubmit)
             {
                 return;
             }
@@ -97,14 +104,10 @@
             await JSRuntime.InvokeVoidAsync("triggerInput");
 
             var started = await LocalStorage.GetItemAsync<DateTime?>("Started");
-            if (started == null)
-            {
-                return;
-            }
-
             var endTime = started.Value.AddMinutes(40);
             if (DateTime.Now > endTime)
             {
+                NavigationManager.NavigateTo("/prohibited");
                 return;
             }
 
@@ -125,16 +128,12 @@
     }
 
     private string result = string.Empty;
+    string runText = "Run Tests";
     private async Task Run()
     {
-        result = "Running test cases...";
-        await Task.Yield();
-
-        bool canSubmit = await CanSubmit();
-        if (!canSubmit)
-        {
-            return;
-        }
+        isProcessing = true;
+        result = string.Empty;
+        runText = "Running tests...";
 
         for (int i = 0; i < CodeHelper.Codes.Count; i++)
         {
@@ -142,6 +141,8 @@
         }
 
         result = await ExecuteCode();
+        isProcessing = false;
+        runText = "Run Tests";
     }
 
     private async Task<string> ExecuteCode()

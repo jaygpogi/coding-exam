@@ -12,7 +12,12 @@ body, #nameTextBox, #startButton, .code, #run, #submit {
 #startButton, #run, #submit {
     font-size: 1em;
     padding: 5px;
-    border: 1px solid
+    border: 1px solid;
+    cursor: pointer;
+}
+#startButton:disabled, #run:disabled, #submit:disabled {
+    color: darkgray;
+    cursor: default;
 }
 
 .code {
@@ -22,10 +27,6 @@ body, #nameTextBox, #startButton, .code, #run, #submit {
     font-size: 1em;
     resize: both;
     height: auto;
-}
-
-#startButton, #run, #submit {
-    cursor: pointer;
 }
 
 #side {
