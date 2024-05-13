@@ -10,7 +10,7 @@
 <div id="side">
     <div id="control">
         <span>@timeLeft</span>
-        <button id="run" @onclick="Run">Save and Run</button>
+        <button id="run" @onclick="Run">Run Tests</button>
         <button id="submit" @onclick=Submit>Submit</button>
     </div>
     @((MarkupString)result)
@@ -19,9 +19,10 @@
 <div id="container">
     @foreach(Code item in CodeHelper.Codes)
     {
-        <pre>@item.Signature</pre>
-        <InputTextArea class="code" cols="75" rows="30" @bind-Value="item.Editable"></InputTextArea>
-        <pre>}</pre>
+        <pre style="margin-bottom:0">@item.Signature</pre>
+        <InputTextArea class="code" cols="75" @bind-Value="item.Editable"
+                       oninput="this.style.height='auto';this.style.height=(this.scrollHeight) + 'px';"></InputTextArea>
+        <pre style="margin-top:0">}</pre>
     }
 </div>
 
@@ -86,6 +87,8 @@
                     CodeHelper.Codes[i].Editable = localCode;
                 }
             }
+            await InvokeAsync(StateHasChanged);
+            await JSRuntime.InvokeVoidAsync("triggerInput");
 
             var started = await LocalStorage.GetItemAsync<DateTime?>("Started");
             if (started == null)

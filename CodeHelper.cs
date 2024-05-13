@@ -62,7 +62,7 @@ namespace CodingExam
         public string? Signature { get; set; }
         public string? Editable { get; set; }
 
-		public string ToMethod()
+        public string ToMethod()
 		{
 			return $@"{Signature}
 	{Editable}" + @"

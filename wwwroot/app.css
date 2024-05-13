@@ -17,9 +17,11 @@ body, #nameTextBox, #startButton, .code, #run, #submit {
 
 .code {
     margin-left: 10px;
-    border: 1px solid;
-    padding: 10px;
+    border: 1px solid #999;
+    padding: 10px 10px 0 10px;
     font-size: 1em;
+    resize: both;
+    height: auto;
 }
 
 #startButton, #run, #submit {

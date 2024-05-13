@@ -24,6 +24,11 @@
                 hljs.highlightBlock(el);
             });
         }
+        window.triggerInput = function () {
+            document.querySelectorAll('textarea').forEach((el) => {
+                el.dispatchEvent(new Event("input"))
+            });
+        }
     </script>
     <script src="_framework/blazor.web.js"></script>
 </body>

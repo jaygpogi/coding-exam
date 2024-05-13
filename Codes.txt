@@ -45,7 +45,6 @@ return string.Join(",", output);#EDITABLE#
 // if divisible by 5, write 'Five'
 // if divisible by 10, write 'Ten'
 // if not divisible by 2, 5, and 10, write the number
-// sample result: 1,Two,3,Two,Five,Two,7,Two,9,Ten
 public static string DetermineDivisibilities(string input)
 {
 #EDITABLE#List<int> numbers = input.Split(',').Select(x => int.Parse(x)).ToList();
