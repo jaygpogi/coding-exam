@@ -65,6 +65,7 @@
         bool confirmed = await CanSubmit() && await JSRuntime.InvokeAsync<bool>("confirm", "Are you sure you are done with all 3 coding tests?");
         if (confirmed)
         {
+            _timerCancellationToken.Cancel();
             isProcessing = true;
             submitText = "Submitting...";
             await InvokeAsync(StateHasChanged);

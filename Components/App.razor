@@ -26,9 +26,19 @@
         }
         window.triggerInput = function () {
             document.querySelectorAll('textarea').forEach((el) => {
-                el.dispatchEvent(new Event("input"))
+                el.dispatchEvent(new Event("input"));
+                el.addEventListener('keydown', function (e) {
+                    if (e.key == 'Tab') {
+                        e.preventDefault();
+                        var start = this.selectionStart;
+                        var end = this.selectionEnd;
+                        this.value = this.value.substring(0, start) + "   " + this.value.substring(end);
+                        this.selectionStart = this.selectionEnd = start + 3;
+                    }
+                });
             });
         }
+
     </script>
     <script src="_framework/blazor.web.js"></script>
 </body>

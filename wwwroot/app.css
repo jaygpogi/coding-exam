@@ -3,7 +3,7 @@ body {
     font-size:1.1em;
 }
 
-body, #nameTextBox, #startButton, .code, #run, #submit {
+body, #startButton, .code, #run, #submit {
     font-family: monospace;
     background: #f3f3f3;
     color: #444;

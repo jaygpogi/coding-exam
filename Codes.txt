@@ -8,10 +8,10 @@ public static string LongestBetween(string input)
 int end = 0;
 for(int i = 0; i < input.Length; i++)
 {
-    if(input[i] == '<')
-    {
-        start = i;
-    }
+   if(input[i] == '<')
+   {
+      start = i;
+   }
 }
 return start.ToString();#EDITABLE#
 }
@@ -20,7 +20,7 @@ return start.ToString();#EDITABLE#
 // Each number will be compared against other numbers.
 // Rank is the count of all numbers less than the current number.
 // Currentnumber will then be saved depending on his rank as index on the array
-// Do not use pre-defined sorting methods (eg.Sort, OrderBy)
+// Do not use pre-defined sorting methods like Sort() and OrderBy()
 public static string SortNumbers(string input)
 {
 #EDITABLE#List<int> numbers = input.Split(',').Select(x => int.Parse(x)).ToList();
