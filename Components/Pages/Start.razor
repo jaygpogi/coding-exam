@@ -38,11 +38,15 @@
     string[] instructions = File.ReadAllLines("Instructions.txt");
     bool instructionsCheck = false;
 
+    DateTime? Started;
+    DateTime? Submitted;
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         if (firstRender)
         {
-            await CanSubmit();
+            Started = await LocalStorage.GetItemAsync<DateTime?>("Started");
+            Submitted = await LocalStorage.GetItemAsync<DateTime?>("Submitted");
+            CanSubmit();
         }
     }
 
@@ -58,11 +62,10 @@
         isStarting = true;
         startText = "Starting...";
 
-        bool canSubmit = await CanSubmit();
+        bool canSubmit = CanSubmit();
         if (canSubmit)
         {
-            DateTime? started = await LocalStorage.GetItemAsync<DateTime?>("Started");
-            if (started == null)
+            if (Started == null)
             {
                 await LocalStorage.SetItemAsync<DateTime>("Started", DateTime.Now);
                 await Common.SendEmail($"JayG Coding Exam - {Participant} Started", Common.ToSingaporeTime(DateTime.Now).ToString());
@@ -71,12 +74,11 @@
         }
     }
 
-    private async Task<bool> CanSubmit()
+    private bool CanSubmit()
     {
-        DateTime? submitted = await LocalStorage.GetItemAsync<DateTime?>("Submitted");
         if (string.IsNullOrWhiteSpace(participantId)
             || string.IsNullOrWhiteSpace(Participant)
-            || submitted != null)
+            || Submitted != null)
         {
             NavigationManager.NavigateTo("/prohibited");
             return false;

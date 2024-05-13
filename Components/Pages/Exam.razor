@@ -43,14 +43,11 @@
         }
     }
 
-    private async Task<bool> CanSubmit()
+    private bool CanSubmit()
     {
-        DateTime? started = await LocalStorage.GetItemAsync<DateTime?>("Started");
-        DateTime? submitted = await LocalStorage.GetItemAsync<DateTime?>("Submitted");
-
         if (string.IsNullOrWhiteSpace(Participant)
-            || started == null
-            || submitted != null)
+            || Started == null
+            || Submitted != null)
         {
             NavigationManager.NavigateTo("/prohibited");
             return false;
@@ -62,7 +59,7 @@
     string submitText = "Submit";
     private async Task Submit()
     {
-        bool confirmed = await CanSubmit() && await JSRuntime.InvokeAsync<bool>("confirm", "Are you sure you are done with all 3 coding tests?");
+        bool confirmed = CanSubmit() && await JSRuntime.InvokeAsync<bool>("confirm", "Are you sure you are done with all 3 coding tests?");
         if (confirmed)
         {
             _timerCancellationToken.Cancel();
@@ -72,21 +69,24 @@
 
             await LocalStorage.SetItemAsync<DateTime>("Submitted", DateTime.Now);
             string codeResult = await ExecuteCode();
-            var started = await LocalStorage.GetItemAsync<DateTime?>("Started");
-            var timeElapsed = (DateTime.Now - started.Value).ToString("hh\\:mm\\:ss");
-            await Common.SendEmail($"JayG Coding Exam - {Participant} Submitted", $"{Common.ToSingaporeTime(started.Value)} -> {Common.ToSingaporeTime(DateTime.Now)} ({timeElapsed})<pre>{codeResult}</pre>", CodeHelper.FullCode());
+            var timeElapsed = (DateTime.Now - Started.Value).ToString("hh\\:mm\\:ss");
+            await Common.SendEmail($"JayG Coding Exam - {Participant} Submitted", $"{Common.ToSingaporeTime(Started.Value)} -> {Common.ToSingaporeTime(DateTime.Now)} ({timeElapsed})<pre>{codeResult}</pre>", CodeHelper.FullCode());
             NavigationManager.NavigateTo("/completed");
         }
     }
 
     private string timeLeft = "00:00";
     private readonly CancellationTokenSource _timerCancellationToken = new();
+    DateTime? Started;
+    DateTime? Submitted;
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         if (firstRender)
         {
-            var canSubmit = await CanSubmit();
-            if (!canSubmit)
+            Started = await LocalStorage.GetItemAsync<DateTime?>("Started");
+            Submitted = await LocalStorage.GetItemAsync<DateTime?>("Submitted");
+
+            if (!CanSubmit())
             {
                 return;
             }
@@ -104,8 +104,7 @@
             await InvokeAsync(StateHasChanged);
             await JSRuntime.InvokeVoidAsync("triggerInput");
 
-            var started = await LocalStorage.GetItemAsync<DateTime?>("Started");
-            var endTime = started.Value.AddMinutes(40);
+            var endTime = Started.Value.AddMinutes(40);
             if (DateTime.Now > endTime)
             {
                 NavigationManager.NavigateTo("/prohibited");
@@ -135,15 +134,16 @@
         isProcessing = true;
         result = string.Empty;
         runText = "Running tests...";
+        await Task.Yield();
+
+        result = await ExecuteCode();
+        isProcessing = false;
+        runText = "Run Tests";
 
         for (int i = 0; i < CodeHelper.Codes.Count; i++)
         {
             await LocalStorage.SetItemAsync<string>($"LocalCode{i}", CodeHelper.Codes[i].Editable);
         }
-
-        result = await ExecuteCode();
-        isProcessing = false;
-        runText = "Run Tests";
     }
 
     private async Task<string> ExecuteCode()
