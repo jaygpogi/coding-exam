@@ -1,6 +1,2 @@
 ﻿@page "/generate"
-<p>@newID</p>
-
-@code {
-    string? newID = Guid.NewGuid().ToString().ToUpper().Substring(0, 5);
-}
+<p>@Guid.NewGuid().ToString().ToUpper().Substring(0, 5)</p>
