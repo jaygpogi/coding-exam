@@ -1,5 +1,4 @@
 ﻿using Azure.Communication.Email;
-using Microsoft.AspNetCore.Mvc.Formatters;
 using System.Diagnostics;
 
 namespace CodingExam
