@@ -59,7 +59,7 @@
     string submitText = "Submit";
     private async Task Submit()
     {
-        bool confirmed = CanSubmit() && await JSRuntime.InvokeAsync<bool>("confirm", "Are you sure you are done with all 3 coding tests?");
+        bool confirmed = CanSubmit() && await JSRuntime.InvokeAsync<bool>("confirm", "Are you sure you want to submit all 3 coding test answers?");
         if (confirmed)
         {
             _timerCancellationToken.Cancel();
