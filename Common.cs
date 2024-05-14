@@ -37,7 +37,7 @@ namespace CodingExam
             {
                 emailMessage.Attachments.Add(new EmailAttachment("code.txt", "txt", BinaryData.FromString(attachmentContent)));
             }
-            await emailClient.SendAsync(Azure.WaitUntil.Completed, emailMessage);
+            await emailClient.SendAsync(Azure.WaitUntil.Started, emailMessage);
         }
 
         public DateTime ToSingaporeTime(DateTime dateTime)
