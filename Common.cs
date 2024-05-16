@@ -4,7 +4,8 @@ using System.Diagnostics;
 namespace CodingExam
 {
     public class Common
-    { 
+    {
+        private bool isTest = false;
         public string? GetParticipant(string? participantId)
         {
             if (string.IsNullOrWhiteSpace(participantId))
@@ -12,9 +13,10 @@ namespace CodingExam
                 return string.Empty;
             }
 
-            if (Debugger.IsAttached)
+            if (participantId.ToLower() == "test")
             {
-                return "Jay Pogi";
+                isTest = true;
+                return "JayG Pogi";
             }
 
             return Environment.GetEnvironmentVariable(participantId);
@@ -22,7 +24,7 @@ namespace CodingExam
 
         public async Task SendEmail(string subject, string content, string? attachmentContent = null)
         {
-            if (Debugger.IsAttached)
+            if (isTest)
             {
                 return;
             }
