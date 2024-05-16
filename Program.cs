@@ -29,4 +29,6 @@ app.UseAntiforgery();
 app.MapRazorComponents<App>()
     .AddInteractiveServerRenderMode();
 
+app.UseStatusCodePagesWithRedirects("/prohibited");
+
 app.Run();
