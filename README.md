@@ -3,16 +3,13 @@
 
 ## Email Environment Variables
 
-Emails are automatically disabled while debugging. 
+Emails are automatically disabled while on test mode. 
 
 Setup Azure Communication and set it as environment variable:
 
-EMAIL_CONNECTION_STRING = Azure communication email connection string
-EMAIL_SENDER_ADDRESS = email domain (you can setup a free one in Azure)
-EMAIL_RECIPIENT = email address the notifications to be sent to.
-
-## Generate ID for candidate session
-Generate an ID using the /generate route. Add it as environment variable and set candidate name as value. Then use route /[ID]/start to start app. This ID will be the session pass for the candidate. App has localStorage restrictions on validating resubmissions but users can still access the app if he clears localStorage or on another browser as long as this ID is in environment variables. So remove it when the candidate is finished.
+- EMAIL_CONNECTION_STRING = Azure communication email connection string
+- EMAIL_SENDER_ADDRESS = email domain (you can setup a free one in Azure)
+- EMAIL_RECIPIENT = email address the notifications to be sent to.
 
 ## Instructions
 Set instructions in Instructions.txt. This will be parsed per line and will be displayed on start page.
@@ -41,3 +38,7 @@ As of the moment, the tests module only accepts and returns string parameters. T
 RunTest([method name], "[test data]", "[expected result]", output);
 ```
 
+## Generate ID for candidate session
+Generate an ID using the /generate route. Add it as environment variable and set candidate name as value. Then use route /[ID]/start to start app. This ID will be the session pass for the candidate. App has localStorage restrictions on validating resubmissions but users can still access the app if he clears localStorage or on another browser as long as this ID is in environment variables. So remove it when the candidate is finished.
+
+To activate test mode, you can use "test" as ID.
