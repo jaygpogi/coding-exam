@@ -1,7 +1,8 @@
-﻿// Get the longest possible string length between
-// the first less than (<) and last greater than (>) signs
-// Do not use pre-defined functions (eg. IndexOf, Math.Max, Regex, etc.)
+﻿// Get the first index of less than (<) sign
+// and last index of greater than (>) sign.
+// Use these indexes to determine the length of the characters in between.
 // If the less than and greater than signs are not properly closed, return 0.
+// Do not use pre-defined functions (eg. IndexOf, Math.Max, Regex, etc.)
 public static string LongestBetween(string input)
 {
 #EDITABLE#int start = 0;
@@ -13,13 +14,20 @@ for(int i = 0; i < input.Length; i++)
       start = i;
    }
 }
-return start.ToString();#EDITABLE#
+for(int i = input.Length; i > 0; i++)
+{
+   if(input[i] == '<')
+   {
+      end = i;
+   }
+}
+
+return (end - start).ToString();#EDITABLE#
 }
 #SPLIT#
-// This sorts the list in ascending order using ranks.
 // Each number will be compared against other numbers.
-// Rank is the count of all numbers less than the current number.
-// Currentnumber will then be saved depending on his rank as index on the array
+// Count all numbers less than the current number.
+// Save the current number to the output array using this count as index 
 // Do not use pre-defined sorting functions (eg. Sort, OrderBy, etc.)
 public static string SortNumbers(string input)
 {
