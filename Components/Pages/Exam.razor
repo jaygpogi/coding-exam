@@ -7,6 +7,12 @@
 @using Microsoft.CodeAnalysis.CSharp.Scripting
 @using Microsoft.CodeAnalysis.Scripting
 
+@if (string.IsNullOrWhiteSpace(Participant))
+{
+    <p>Prohibited</p>
+    return;
+}
+
 <div id="side">
     <div id="control">
         <span>@timeLeft</span>
@@ -45,9 +51,7 @@
 
     private bool CanSubmit()
     {
-        if (string.IsNullOrWhiteSpace(Participant)
-            || Started == null
-            || Submitted != null)
+        if (Started == null || Submitted != null)
         {
             NavigationManager.NavigateTo("/prohibited");
             return false;
@@ -81,7 +85,7 @@
     DateTime? Submitted;
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-        if (firstRender)
+        if (firstRender && !string.IsNullOrWhiteSpace(Participant))
         {
             Started = await LocalStorage.GetItemAsync<DateTime?>("Started");
             Submitted = await LocalStorage.GetItemAsync<DateTime?>("Submitted");

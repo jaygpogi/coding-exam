@@ -4,6 +4,12 @@
 @inject IJSRuntime JSRuntime
 @inject Blazored.LocalStorage.ILocalStorageService LocalStorage
 
+@if (string.IsNullOrWhiteSpace(Participant))
+{
+    <p>Prohibited</p>
+    return;
+}
+
 <div class="startMessage">
     <p>Welcome @Participant.</p>
     <ul>
@@ -42,7 +48,7 @@
     DateTime? Submitted;
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-        if (firstRender)
+        if (firstRender && !string.IsNullOrWhiteSpace(Participant))
         {
             Started = await LocalStorage.GetItemAsync<DateTime?>("Started");
             Submitted = await LocalStorage.GetItemAsync<DateTime?>("Submitted");
@@ -76,9 +82,7 @@
 
     private bool CanSubmit()
     {
-        if (string.IsNullOrWhiteSpace(participantId)
-            || string.IsNullOrWhiteSpace(Participant)
-            || Submitted != null)
+        if (Submitted != null)
         {
             NavigationManager.NavigateTo("/prohibited");
             return false;
